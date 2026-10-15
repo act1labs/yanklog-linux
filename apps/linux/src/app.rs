@@ -10,7 +10,7 @@ use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::mpsc;
 use std::sync::{Arc, Mutex};
 use std::thread;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 use yanklog_core::{
     check_for_update, copy_to_clipboard, install_profile_update, profile_release_notes,
     ClipboardMonitor, Config, Database, Platform, Profile, ThemePreference,
@@ -383,6 +383,8 @@ pub fn run() {
     }
 
     let application = adw::Application::builder().application_id(app_id()).build();
+    let starting = Rc::new(Cell::new(false));
+    let show_requested = Rc::new(Cell::new(!start_hidden));
     application.connect_activate(move |app| {
         install_css();
         apply_theme(&Config::load(&profile()).unwrap_or_default());
@@ -390,9 +392,66 @@ pub fn run() {
             window.present();
             return;
         }
-        build_main_window(app, !start_hidden);
+        if starting.get() {
+            // Still waiting for the database key; show the window once it opens.
+            show_requested.set(true);
+            return;
+        }
+        starting.set(true);
+
+        // Keep the app alive while no window exists yet, so a login start that waits
+        // for the keyring does not exit as soon as activation returns.
+        let hold = app.hold();
+        let app = app.clone();
+        let starting = Rc::clone(&starting);
+        let show_requested = Rc::clone(&show_requested);
+        open_database_in_background(profile(), start_background, move |result| {
+            starting.set(false);
+            match result {
+                Ok(database) => build_main_window(&app, database, show_requested.get()),
+                Err(err) => {
+                    show_error_dialog(None, &format!("Failed to open yanklog database: {err}"))
+                }
+            }
+            drop(hold);
+        });
     });
     application.run();
+}
+
+/// How long a login start keeps retrying Secret Service before giving up. At login the
+/// keyring daemon may not be running or unlocked yet.
+const LOGIN_KEYRING_WAIT: Duration = Duration::from_secs(90);
+const LOGIN_KEYRING_RETRY: Duration = Duration::from_secs(2);
+
+fn open_database_in_background(
+    profile: Profile,
+    wait_for_keyring: bool,
+    on_complete: impl FnOnce(Result<Database, String>) + 'static,
+) {
+    let (sender, receiver) = mpsc::channel();
+    thread::spawn(move || {
+        let _ = sender.send(open_database_with_secure_key(&profile, wait_for_keyring));
+    });
+
+    let mut on_complete = Some(on_complete);
+    glib::timeout_add_local(Duration::from_millis(50), move || {
+        match receiver.try_recv() {
+            Ok(result) => {
+                if let Some(on_complete) = on_complete.take() {
+                    on_complete(result);
+                }
+                glib::ControlFlow::Break
+            }
+            Err(mpsc::TryRecvError::Empty) => glib::ControlFlow::Continue,
+            Err(mpsc::TryRecvError::Disconnected) => {
+                if let Some(on_complete) = on_complete.take() {
+                    on_complete(Err("The database worker stopped unexpectedly.".to_string()));
+                }
+                glib::ControlFlow::Break
+            }
+        }
+    });
 }
 
 fn install_css() {
@@ -474,15 +533,9 @@ fn run_cli_update() {
     }
 }
 
-fn build_main_window(app: &adw::Application, present_window: bool) {
+fn build_main_window(app: &adw::Application, database: Database, present_window: bool) {
     let profile = profile();
-    let database = match open_database_with_secure_key(&profile) {
-        Ok(database) => Arc::new(Mutex::new(database)),
-        Err(err) => {
-            show_error_dialog(None, &format!("Failed to open yanklog database: {err}"));
-            return;
-        }
-    };
+    let database = Arc::new(Mutex::new(database));
     let config = Arc::new(Mutex::new(Config::load(&profile).unwrap_or_default()));
     let poll_interval_ms = config
         .lock()
@@ -983,11 +1036,26 @@ fn onboarding_page(title: &str, body: &str) -> gtk::Box {
     page
 }
 
-fn open_database_with_secure_key(profile: &Profile) -> Result<Database, String> {
-    let key_profile = profile.clone();
-    let key_result = thread::spawn(move || resolve_secure_database_key(&key_profile))
-        .join()
-        .map_err(|_| "The secure-key worker stopped unexpectedly.".to_string())?;
+fn open_database_with_secure_key(
+    profile: &Profile,
+    wait_for_keyring: bool,
+) -> Result<Database, String> {
+    let deadline = Instant::now()
+        + if wait_for_keyring {
+            LOGIN_KEYRING_WAIT
+        } else {
+            Duration::ZERO
+        };
+    let key_result = loop {
+        match resolve_secure_database_key(profile) {
+            Ok(resolved) => break Ok(resolved),
+            Err(error) if Instant::now() < deadline => {
+                eprintln!("Secure key storage not ready yet, retrying: {error}");
+                thread::sleep(LOGIN_KEYRING_RETRY);
+            }
+            Err(error) => break Err(error),
+        }
+    };
 
     match key_result {
         Ok((key, legacy_key_path)) => {
@@ -1003,6 +1071,14 @@ fn open_database_with_secure_key(profile: &Profile) -> Result<Database, String> 
             Ok(database)
         }
         Err(error) => {
+            let data_dir = profile.data_dir();
+            if data_dir.join("history.db").exists() && !data_dir.join("secret.key").exists() {
+                // The existing history's key lives in Secret Service. Falling back would
+                // create a new local key that cannot open it.
+                return Err(format!(
+                    "Secure key storage is unavailable ({error}). Unlock your keyring and start yanklog again."
+                ));
+            }
             eprintln!(
                 "Secure key storage unavailable; using the protected local key file: {error}"
             );
@@ -2633,13 +2709,19 @@ fn show_quick_picker_window(app: &adw::Application, shared: Option<PickerShared>
             let profile = profile();
             let config = Config::load(&profile).unwrap_or_default();
             apply_theme(&config);
-            let database = match open_database_with_secure_key(&profile) {
-                Ok(database) => Arc::new(Mutex::new(database)),
-                Err(err) => {
-                    show_error_dialog(None, &format!("Failed to open yanklog database: {err}"));
-                    return;
-                }
-            };
+            let key_profile = profile.clone();
+            let database =
+                match thread::spawn(move || open_database_with_secure_key(&key_profile, false))
+                    .join()
+                    .unwrap_or_else(
+                        |_| Err("The database worker stopped unexpectedly.".to_string()),
+                    ) {
+                    Ok(database) => Arc::new(Mutex::new(database)),
+                    Err(err) => {
+                        show_error_dialog(None, &format!("Failed to open yanklog database: {err}"));
+                        return;
+                    }
+                };
             (database, config, None, None)
         }
     };
