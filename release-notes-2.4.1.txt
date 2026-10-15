@@ -1,0 +1,4 @@
+YankLog 2.4.1 for Linux fixes starting at login.
+
+- "Start YankLog when I sign in" works again on systems where the keyring is not ready right after login, such as virtual machines and computers that sign in automatically. YankLog now waits for the keyring instead of quitting without a message.
+- If the keyring stays locked, YankLog no longer creates a new key that cannot open your existing history. Unlock the keyring and start YankLog again.
