@@ -1,0 +1,4 @@
+YankLog 2.4.2 for Linux is a small maintenance release.
+
+- The Flatpak build now reports its correct version.
+- The release history shown in software centers now includes 2.4.0 and 2.4.1.

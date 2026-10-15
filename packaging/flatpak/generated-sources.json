@@ -1094,19 +1094,6 @@
     {
         "type": "archive",
         "archive-type": "tar-gzip",
-        "url": "https://static.crates.io/crates/fs2/fs2-0.4.3.crate",
-        "sha256": "9564fc758e15025b46aa6643b1b77d047d1a56a1aea6e01002ac0c7026876213",
-        "dest": "cargo/vendor/fs2-0.4.3"
-    },
-    {
-        "type": "inline",
-        "contents": "{\"package\": \"9564fc758e15025b46aa6643b1b77d047d1a56a1aea6e01002ac0c7026876213\", \"files\": {}}",
-        "dest": "cargo/vendor/fs2-0.4.3",
-        "dest-filename": ".cargo-checksum.json"
-    },
-    {
-        "type": "archive",
-        "archive-type": "tar-gzip",
         "url": "https://static.crates.io/crates/futures-channel/futures-channel-0.3.32.crate",
         "sha256": "07bbe89c50d7a535e539b8c17bc0b49bdb77747034daa8087407d655f3f7cc1d",
         "dest": "cargo/vendor/futures-channel-0.3.32"
@@ -3689,45 +3676,6 @@
         "type": "inline",
         "contents": "{\"package\": \"a28ac98ddc8b9274cb41bb4d9d4d5c425b6020c50c46f25559911905610b4a88\", \"files\": {}}",
         "dest": "cargo/vendor/weezl-0.1.12",
-        "dest-filename": ".cargo-checksum.json"
-    },
-    {
-        "type": "archive",
-        "archive-type": "tar-gzip",
-        "url": "https://static.crates.io/crates/winapi/winapi-0.3.9.crate",
-        "sha256": "5c839a674fcd7a98952e593242ea400abe93992746761e38641405d28b00f419",
-        "dest": "cargo/vendor/winapi-0.3.9"
-    },
-    {
-        "type": "inline",
-        "contents": "{\"package\": \"5c839a674fcd7a98952e593242ea400abe93992746761e38641405d28b00f419\", \"files\": {}}",
-        "dest": "cargo/vendor/winapi-0.3.9",
-        "dest-filename": ".cargo-checksum.json"
-    },
-    {
-        "type": "archive",
-        "archive-type": "tar-gzip",
-        "url": "https://static.crates.io/crates/winapi-i686-pc-windows-gnu/winapi-i686-pc-windows-gnu-0.4.0.crate",
-        "sha256": "ac3b87c63620426dd9b991e5ce0329eff545bccbbb34f3be09ff6fb6ab51b7b6",
-        "dest": "cargo/vendor/winapi-i686-pc-windows-gnu-0.4.0"
-    },
-    {
-        "type": "inline",
-        "contents": "{\"package\": \"ac3b87c63620426dd9b991e5ce0329eff545bccbbb34f3be09ff6fb6ab51b7b6\", \"files\": {}}",
-        "dest": "cargo/vendor/winapi-i686-pc-windows-gnu-0.4.0",
-        "dest-filename": ".cargo-checksum.json"
-    },
-    {
-        "type": "archive",
-        "archive-type": "tar-gzip",
-        "url": "https://static.crates.io/crates/winapi-x86_64-pc-windows-gnu/winapi-x86_64-pc-windows-gnu-0.4.0.crate",
-        "sha256": "712e227841d057c1ee1cd2fb22fa7e5a5461ae8e48fa2ca79ec42cfc1931183f",
-        "dest": "cargo/vendor/winapi-x86_64-pc-windows-gnu-0.4.0"
-    },
-    {
-        "type": "inline",
-        "contents": "{\"package\": \"712e227841d057c1ee1cd2fb22fa7e5a5461ae8e48fa2ca79ec42cfc1931183f\", \"files\": {}}",
-        "dest": "cargo/vendor/winapi-x86_64-pc-windows-gnu-0.4.0",
         "dest-filename": ".cargo-checksum.json"
     },
     {

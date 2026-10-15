@@ -47,6 +47,27 @@
     </screenshot>
   </screenshots>
   <releases>
+    <release version="2.4.2" date="2026-10-16">
+      <description>
+        <p>The Flatpak build now reports its correct version, and the Flatpak release history is up to date.</p>
+      </description>
+    </release>
+    <release version="2.4.1" date="2026-10-15">
+      <description>
+        <p>Starting at login works again on systems where the keyring is not ready right after login, and a locked keyring no longer leads to a new key that cannot open existing history.</p>
+      </description>
+    </release>
+    <release version="2.4.0" date="2026-10-09">
+      <description>
+        <p>A redesigned main window and Quick Pick, standard GNOME settings, faster Quick Pick from the running app, and more dependable pausing.</p>
+        <ul>
+          <li>History is grouped into Pinned, Today, Yesterday, and Earlier.</li>
+          <li>Quick Pick shows the full text of the highlighted clip.</li>
+          <li>Privacy and history settings apply at once, without a restart.</li>
+          <li>Nothing copied while paused is saved, and a pause stays on after a restart.</li>
+        </ul>
+      </description>
+    </release>
     <release version="2.0.2" date="2026-07-30">
       <description>
         <p>Flatpak tray integration and portal-based start-at-login support.</p>
