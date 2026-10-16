@@ -1,12 +1,14 @@
 app-id: com.yanklog.YankLog
 runtime: org.gnome.Platform
-runtime-version: "50"
+runtime-version: "51"
 sdk: org.gnome.Sdk
 command: yanklog
 
 finish-args:
   - --share=ipc
   - --socket=wayland
+  # GNOME on Wayland has no data-control protocol, so background clipboard
+  # monitoring only works through X11 (XWayland). fallback-x11 captures nothing there.
   - --socket=x11
   - --device=dri
   - --talk-name=org.freedesktop.secrets
