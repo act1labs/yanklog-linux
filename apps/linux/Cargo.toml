@@ -1,6 +1,6 @@
 [package]
 name = "yanklog-linux-native"
-version = "2.4.2"
+version = "2.5.0"
 edition.workspace = true
 license = "MIT"
 publish = false
@@ -12,7 +12,7 @@ path = "src/main.rs"
 
 [features]
 default = []
-flatpak = []
+flatpak = ["dep:oo7"]
 
 [dependencies]
 chrono = "0.4"
@@ -25,4 +25,5 @@ async-io = "2.6"
 gtk = { package = "gtk4", version = "0.11" }
 ctrlc = "3.5"
 keyring = { version = "3.6.3", default-features = false, features = ["sync-secret-service", "vendored"] }
+oo7 = { version = "0.6.0", default-features = false, features = ["async-std", "native_crypto"], optional = true }
 ksni = { version = "0.3", default-features = false, features = ["async-io", "blocking"] }

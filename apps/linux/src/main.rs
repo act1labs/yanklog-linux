@@ -4,6 +4,8 @@ mod logic;
 
 #[cfg(target_os = "linux")]
 mod app;
+#[cfg(target_os = "linux")]
+mod focus_capture;
 
 #[cfg(target_os = "linux")]
 fn main() {

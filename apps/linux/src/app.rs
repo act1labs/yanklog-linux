@@ -13,7 +13,8 @@ use std::thread;
 use std::time::{Duration, Instant};
 use yanklog_core::{
     check_for_update, copy_to_clipboard, install_profile_update, profile_release_notes,
-    ClipboardMonitor, Config, Database, Platform, Profile, ThemePreference,
+    system_clipboard_available, ClipboardMonitor, Config, Database, Platform, Profile,
+    ThemePreference,
 };
 
 use crate::logic::{
@@ -546,15 +547,27 @@ fn build_main_window(app: &adw::Application, database: Database, present_window:
     let secret_hint = Arc::new(SecretHint::default());
     let history_revision = Arc::new(AtomicU64::new(0));
 
-    watch_clipboard_secret_hint(Arc::clone(&secret_hint));
-    start_clipboard_monitor(
-        Arc::clone(&database),
-        Arc::clone(&monitor),
-        Arc::clone(&config),
-        Arc::clone(&pause_state),
-        secret_hint,
-        Arc::clone(&history_revision),
-    );
+    if uses_system_clipboard() {
+        watch_clipboard_secret_hint(Arc::clone(&secret_hint));
+        start_clipboard_monitor(
+            Arc::clone(&database),
+            Arc::clone(&monitor),
+            Arc::clone(&config),
+            Arc::clone(&pause_state),
+            secret_hint,
+            Arc::clone(&history_revision),
+        );
+    } else {
+        start_focus_capture(
+            app,
+            poll_interval_ms,
+            Arc::clone(&database),
+            Arc::clone(&monitor),
+            Arc::clone(&config),
+            Arc::clone(&pause_state),
+            Arc::clone(&history_revision),
+        );
+    }
 
     let window = gtk::ApplicationWindow::builder()
         .application(app)
@@ -565,6 +578,8 @@ fn build_main_window(app: &adw::Application, database: Database, present_window:
 
     let header = adw::HeaderBar::new();
     header.set_title_widget(Some(&gtk::Box::new(gtk::Orientation::Horizontal, 0)));
+    // Closing the window keeps YankLog running, so quitting must not depend on a tray.
+    header.pack_end(&main_menu_button(app));
     let settings_button = gtk::Button::with_label("Settings");
     let pause_button = gtk::Button::with_label("Pause");
     let pause_options_button = gtk::MenuButton::new();
@@ -902,7 +917,7 @@ fn maybe_show_onboarding(
     {
         let status = status.clone();
         copy_command.connect_clicked(move |_| {
-            let _ = copy_to_clipboard(&quick_picker_command_text());
+            let _ = set_clipboard_text(&quick_picker_command_text());
             show_status(&status, "Quick Pick command copied");
         });
     }
@@ -1087,13 +1102,19 @@ fn open_database_with_secure_key(
     }
 }
 
-fn resolve_secure_database_key(profile: &Profile) -> Result<(String, Option<PathBuf>), String> {
-    let account = if profile.dev {
+fn database_key_account(profile: &Profile) -> &'static str {
+    if profile.dev {
         "database-key-dev"
     } else {
         "database-key"
-    };
-    let entry = keyring::Entry::new(app_id(), account).map_err(|error| error.to_string())?;
+    }
+}
+
+/// Native builds keep the key in the host Secret Service.
+#[cfg(not(feature = "flatpak"))]
+fn resolve_secure_database_key(profile: &Profile) -> Result<(String, Option<PathBuf>), String> {
+    let entry = keyring::Entry::new(app_id(), database_key_account(profile))
+        .map_err(|error| error.to_string())?;
     match entry.get_password() {
         Ok(key) if Database::is_valid_encryption_key(key.trim()) => {
             return Ok((key.trim().to_string(), None));
@@ -1103,23 +1124,88 @@ fn resolve_secure_database_key(profile: &Profile) -> Result<(String, Option<Path
         Err(error) => return Err(error.to_string()),
     }
 
-    let legacy_key_path = profile.data_dir().join("secret.key");
-    let (key, migrated_path) = if legacy_key_path.exists() {
-        let key = std::fs::read_to_string(&legacy_key_path)
-            .map_err(|error| format!("Could not read the existing database key: {error}"))?;
-        let key = key.trim().to_string();
-        if !Database::is_valid_encryption_key(&key) {
-            return Err("The existing database key is invalid.".to_string());
-        }
-        (key, Some(legacy_key_path))
-    } else {
-        (Database::generate_encryption_key(), None)
-    };
-
+    let (key, migrated_path) = legacy_or_new_database_key(profile)?;
     entry
         .set_password(&key)
         .map_err(|error| error.to_string())?;
     Ok((key, migrated_path))
+}
+
+/// Flatpak builds keep the key through the Secret portal, which works whatever
+/// password manager the host uses and needs no access to the host's keyring.
+#[cfg(feature = "flatpak")]
+fn resolve_secure_database_key(profile: &Profile) -> Result<(String, Option<PathBuf>), String> {
+    async_io::block_on(async {
+        let attributes = std::collections::HashMap::from([
+            ("application", app_id()),
+            ("account", database_key_account(profile)),
+        ]);
+        let keyring = oo7::Keyring::new()
+            .await
+            .map_err(|error| error.to_string())?;
+        let items = keyring
+            .search_items(&attributes)
+            .await
+            .map_err(|error| error.to_string())?;
+        if let Some(item) = items.first() {
+            let secret = item.secret().await.map_err(|error| error.to_string())?;
+            let key = std::str::from_utf8(secret.as_bytes())
+                .map(|key| key.trim().to_string())
+                .unwrap_or_default();
+            return if Database::is_valid_encryption_key(&key) {
+                Ok((key, None))
+            } else {
+                Err("The stored database key is invalid.".to_string())
+            };
+        }
+
+        let (key, migrated_path) = legacy_or_new_database_key(profile)?;
+        if migrated_path.is_none() {
+            set_aside_unreadable_history(profile);
+        }
+        keyring
+            .create_item("YankLog database key", &attributes, key.as_str(), true)
+            .await
+            .map_err(|error| error.to_string())?;
+        Ok((key, migrated_path))
+    })
+}
+
+/// Reuses the key from the legacy key file when there is one, otherwise makes a new key.
+fn legacy_or_new_database_key(profile: &Profile) -> Result<(String, Option<PathBuf>), String> {
+    let legacy_key_path = profile.data_dir().join("secret.key");
+    if !legacy_key_path.exists() {
+        return Ok((Database::generate_encryption_key(), None));
+    }
+    let key = std::fs::read_to_string(&legacy_key_path)
+        .map_err(|error| format!("Could not read the existing database key: {error}"))?;
+    let key = key.trim().to_string();
+    if !Database::is_valid_encryption_key(&key) {
+        return Err("The existing database key is invalid.".to_string());
+    }
+    Ok((key, Some(legacy_key_path)))
+}
+
+/// Earlier Flatpak builds kept the key in the host keyring, which this build can no
+/// longer read. A new key cannot open that history, so move it aside instead of
+/// failing on every start; restoring the old build and file name recovers it.
+#[cfg(feature = "flatpak")]
+fn set_aside_unreadable_history(profile: &Profile) {
+    let history = profile.data_dir().join("history.db");
+    if !history.exists() {
+        return;
+    }
+    let stamp = chrono::Local::now().format("%Y%m%d-%H%M%S");
+    let aside = profile
+        .data_dir()
+        .join(format!("history.db.unreadable-{stamp}"));
+    match std::fs::rename(&history, &aside) {
+        Ok(()) => eprintln!(
+            "The history database's key is not in the Secret portal; moved it to {}",
+            aside.display()
+        ),
+        Err(error) => eprintln!("Could not move the unreadable history database aside: {error}"),
+    }
 }
 
 fn build_pause_popover(
@@ -1181,6 +1267,24 @@ fn update_pause_ui(
     } else {
         monitoring_label.remove_css_class("paused");
     }
+}
+
+fn main_menu_button(app: &adw::Application) -> gtk::MenuButton {
+    let quit = gtk::gio::SimpleAction::new("quit", None);
+    quit.connect_activate({
+        let app = app.clone();
+        move |_, _| app.quit()
+    });
+    app.add_action(&quit);
+    app.set_accels_for_action("app.quit", &["<Control>q"]);
+
+    let menu = gtk::gio::Menu::new();
+    menu.append(Some("Quit YankLog"), Some("app.quit"));
+    gtk::MenuButton::builder()
+        .icon_name("open-menu-symbolic")
+        .tooltip_text("Main menu")
+        .menu_model(&menu)
+        .build()
 }
 
 fn setup_tray(
@@ -2203,7 +2307,7 @@ fn icon_action_button(icon_name: &str, tooltip: &str) -> gtk::Button {
 /// Copies an entry and tells the monitor, which would otherwise record the app's
 /// own copy as a new clipboard change.
 fn copy_entry_text(state: &AppState, content: &str) -> bool {
-    if copy_to_clipboard(content).is_err() {
+    if !set_clipboard_text(content) {
         return false;
     }
     state.monitor.update_last_content(content);
@@ -2635,20 +2739,72 @@ fn start_clipboard_monitor(
         if let Some(content) = monitor.check_for_changes() {
             // Give the main thread a moment to report a password-manager hint for this change.
             thread::sleep(Duration::from_millis(300));
-            if !secret_hint.is_recent() && !config.should_ignore_clipboard(&content) {
-                if let Ok(database) = database.lock() {
-                    if database.insert_entry(&content, "text").is_ok() {
-                        if config.max_history_size > 0 {
-                            let _ = database.prune_old_entries(config.max_history_size);
-                        }
-                        let _ = database.clear_older_than_days(config.retention.max_age_days);
-                        history_revision.fetch_add(1, Ordering::SeqCst);
-                    }
-                }
+            if !secret_hint.is_recent() {
+                record_clipboard_text(&database, &config, &history_revision, &content);
             }
         }
         thread::sleep(poll_interval);
     });
+}
+
+/// Saves captured text to history, applying the privacy rules and history limits.
+fn record_clipboard_text(
+    database: &Mutex<Database>,
+    config: &Config,
+    history_revision: &AtomicU64,
+    content: &str,
+) {
+    if config.should_ignore_clipboard(content) {
+        return;
+    }
+    if let Ok(database) = database.lock() {
+        if database.insert_entry(content, "text").is_ok() {
+            if config.max_history_size > 0 {
+                let _ = database.prune_old_entries(config.max_history_size);
+            }
+            let _ = database.clear_older_than_days(config.retention.max_age_days);
+            history_revision.fetch_add(1, Ordering::SeqCst);
+        }
+    }
+}
+
+/// Whether arboard can reach the clipboard here. When it cannot (GNOME Wayland
+/// without X11), capture and copying go through GTK instead.
+fn uses_system_clipboard() -> bool {
+    static AVAILABLE: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    *AVAILABLE.get_or_init(system_clipboard_available)
+}
+
+/// Puts text on the clipboard with whichever backend this session supports.
+fn set_clipboard_text(text: &str) -> bool {
+    if uses_system_clipboard() {
+        copy_to_clipboard(text).is_ok()
+    } else {
+        crate::focus_capture::set_text(text)
+    }
+}
+
+fn start_focus_capture(
+    app: &adw::Application,
+    poll_interval_ms: u64,
+    database: Arc<Mutex<Database>>,
+    monitor: Arc<ClipboardMonitor>,
+    config: Arc<Mutex<Config>>,
+    pause_state: Arc<PauseState>,
+    history_revision: Arc<AtomicU64>,
+) {
+    let hooks = crate::focus_capture::Hooks {
+        is_paused: Box::new(move || pause_state.is_paused()),
+        observe: Box::new(move |text| monitor.observe(text)),
+        record: Box::new(move |text| {
+            let config = config
+                .lock()
+                .map(|config| config.clone())
+                .unwrap_or_default();
+            record_clipboard_text(&database, &config, &history_revision, &text);
+        }),
+    };
+    crate::focus_capture::start(app, Duration::from_millis(poll_interval_ms.max(250)), hooks);
 }
 
 /// What Quick Pick borrows from the running app, so it opens without unlocking the
@@ -2672,7 +2828,7 @@ fn picker_shared(state: &AppState) -> PickerShared {
 
 /// Copies from Quick Pick, telling the running app's monitor about it when there is one.
 fn picker_copy(monitor: &Option<Arc<ClipboardMonitor>>, content: &str) {
-    if copy_to_clipboard(content).is_ok() {
+    if set_clipboard_text(content) {
         if let Some(monitor) = monitor {
             monitor.update_last_content(content);
         }
@@ -3677,7 +3833,7 @@ fn storage_page(
         let database_path_text = database_path_text.clone();
         let status_label = status_label.clone();
         copy_button.connect_clicked(move |_| {
-            let _ = copy_to_clipboard(&database_path_text);
+            let _ = set_clipboard_text(&database_path_text);
             show_status(&status_label, "Database path copied");
         });
     }
@@ -4149,7 +4305,7 @@ fn show_quick_picker_shortcut_help(app: &adw::Application) {
         let shortcut_command = shortcut_command.clone();
         let status_label = status_label.clone();
         copy_button.connect_clicked(move |_| {
-            let _ = copy_to_clipboard(&shortcut_command);
+            let _ = set_clipboard_text(&shortcut_command);
             show_status(&status_label, "Shortcut command copied");
         });
     }

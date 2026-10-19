@@ -47,6 +47,17 @@
     </screenshot>
   </screenshots>
   <releases>
+    <release version="2.5.0" date="2026-10-19">
+      <description>
+        <p>YankLog no longer needs X11 or a tray icon.</p>
+        <ul>
+          <li>Clipboard history works on GNOME Wayland without X11.</li>
+          <li>The database key is kept through the Secret portal, whatever password manager you use.</li>
+          <li>The main window has a menu with Quit (Ctrl+Q), so YankLog can be closed without a tray icon.</li>
+        </ul>
+        <p>History saved by earlier Flatpak builds cannot be opened by this version and is moved aside.</p>
+      </description>
+    </release>
     <release version="2.4.2" date="2026-10-16">
       <description>
         <p>The Flatpak build now reports its correct version, and the Flatpak release history is up to date.</p>

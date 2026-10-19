@@ -44,9 +44,47 @@ impl ClipboardMonitor {
             *last = content.to_string();
         }
     }
+
+    /// For sources that report clipboard text themselves instead of being polled.
+    /// Returns true when `content` differs from the last text seen, and remembers it.
+    pub fn observe(&self, content: &str) -> bool {
+        if content.is_empty() {
+            return false;
+        }
+        let Ok(mut last) = self.last_content.lock() else {
+            return false;
+        };
+        if *last == content {
+            return false;
+        }
+        *last = content.to_string();
+        true
+    }
+}
+
+/// Whether arboard can reach the system clipboard. On GNOME Wayland without X11
+/// (as in a Flatpak with fallback-x11) there is neither data-control nor X11.
+pub fn system_clipboard_available() -> bool {
+    Clipboard::new().is_ok()
 }
 
 pub fn copy_to_clipboard(text: &str) -> Result<(), arboard::Error> {
     let mut clipboard = Clipboard::new()?;
     clipboard.set_text(text)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn observe_reports_only_new_text() {
+        let monitor = ClipboardMonitor::new(500);
+        assert!(monitor.observe("a"));
+        assert!(!monitor.observe("a"));
+        assert!(!monitor.observe(""));
+        monitor.update_last_content("b");
+        assert!(!monitor.observe("b"));
+        assert!(monitor.observe("c"));
+    }
 }

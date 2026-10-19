@@ -7,11 +7,8 @@ command: yanklog
 finish-args:
   - --share=ipc
   - --socket=wayland
-  # GNOME on Wayland has no data-control protocol, so background clipboard
-  # monitoring only works through X11 (XWayland). fallback-x11 captures nothing there.
-  - --socket=x11
+  - --socket=fallback-x11
   - --device=dri
-  - --talk-name=org.freedesktop.secrets
   - --talk-name=org.kde.StatusNotifierWatcher
 
 modules:

@@ -7,7 +7,7 @@ mod updater;
 
 use std::sync::{Arc, Mutex};
 
-pub use clipboard::{copy_to_clipboard, ClipboardMonitor};
+pub use clipboard::{copy_to_clipboard, system_clipboard_available, ClipboardMonitor};
 pub use config::{format_timestamp, Config, Keybindings, Privacy, Retention, ThemePreference};
 pub use database::{ClipboardEntry, Database};
 pub use profile::{Platform, Profile};

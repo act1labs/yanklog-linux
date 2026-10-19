@@ -1,0 +1,7 @@
+YankLog 2.5.0 for Linux no longer needs X11 or a tray icon.
+
+- The main window has a menu with Quit YankLog (Ctrl+Q), so you can quit without a tray icon. Closing the window still keeps YankLog running in the background.
+- The Flatpak build now captures the clipboard on GNOME Wayland without X11. When you copy in another app, YankLog briefly opens an invisible window to read the copy.
+- The Flatpak build now keeps its database key through the Secret portal, so it works whatever password manager you use.
+
+Important for Flatpak users: earlier Flatpak builds stored the database key in your system keyring, which this version can no longer read. Your existing history is moved aside to a file named history.db.unreadable-<date> in the app's data folder, and YankLog starts a new history. The AppImage is not affected.
