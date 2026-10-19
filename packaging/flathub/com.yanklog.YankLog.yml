@@ -1,9 +1,9 @@
-# Copy this file and packaging/flatpak/generated-sources.json into the
-# com.yanklog.YankLog Flathub submission repository. Update tag and commit together
-# for every release; both must refer to the same public, annotated Git tag.
+# Copy this file and generated-sources.json into the com.yanklog.YankLog Flathub
+# repository. Update tag and commit together for every release; both must refer to
+# the same public Git tag.
 app-id: com.yanklog.YankLog
 runtime: org.gnome.Platform
-runtime-version: "50"
+runtime-version: "51"
 sdk: org.gnome.Sdk
 sdk-extensions:
   - org.freedesktop.Sdk.Extension.rust-stable
@@ -12,9 +12,8 @@ command: yanklog
 finish-args:
   - --share=ipc
   - --socket=wayland
-  - --socket=x11
+  - --socket=fallback-x11
   - --device=dri
-  - --talk-name=org.freedesktop.secrets
   - --talk-name=org.kde.StatusNotifierWatcher
 
 modules:
@@ -34,8 +33,8 @@ modules:
     sources:
       - type: git
         url: https://github.com/thisiseesmaeel/yanklog-linux.git
-        tag: v2.0.2
-        commit: 6aea5924bfbb26d5f1c08aa3a196a453c3e5b90c
+        tag: v2.5.0
+        commit: 76c1f9f451f1862df0ac825a0eceac13eba86295
         x-checker-data:
           type: git
           tag-pattern: ^v([\d.]+)$
