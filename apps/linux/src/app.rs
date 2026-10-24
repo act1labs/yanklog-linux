@@ -26,6 +26,13 @@ const DIRECT_APP_ID: &str = "com.yanklog.app";
 const FLATPAK_APP_ID: &str = "com.yanklog.YankLog";
 const BUNDLED_LINUX_INSTALL_SCRIPT: &str = include_str!("../../../install.sh");
 const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
+const WEBSITE_URL: &str = "https://yanklog.com";
+const SOURCE_URL: &str = "https://github.com/thisiseesmaeel/yanklog-linux";
+const ISSUES_URL: &str = "https://github.com/thisiseesmaeel/yanklog-linux/issues";
+// Wide enough for the five tabs to sit in the header bar, tall enough for the
+// longest tab to show without scrolling.
+const SETTINGS_WINDOW_WIDTH: i32 = 780;
+const SETTINGS_WINDOW_HEIGHT: i32 = 560;
 const QUICK_PICKER_WIDTH: i32 = 620;
 const QUICK_PICKER_HEIGHT: i32 = 460;
 const QUICK_PICKER_LIST_WIDTH: i32 = 262;
@@ -110,6 +117,48 @@ headerbar button:active {
 
 headerbar button:hover {
   background: @card_bg_color;
+}
+
+/* Settings tabs. The global button and headerbar rules above would flatten the
+   view switcher, so the selected tab is drawn here in the accent colour. */
+viewswitcher button,
+viewswitcher button:hover,
+viewswitcher button:active,
+viewswitcher button:checked,
+headerbar viewswitcher button,
+headerbar viewswitcher button:hover,
+headerbar viewswitcher button:active,
+headerbar viewswitcher button:checked {
+  min-height: 0;
+  min-width: 0;
+  margin: 0 1px;
+  padding: 0 2px;
+  border-radius: 8px;
+  border: 0;
+  background: transparent;
+  color: alpha(@window_fg_color, 0.68);
+  box-shadow: none;
+  font-weight: 500;
+}
+
+viewswitcher button:hover,
+headerbar viewswitcher button:hover {
+  background: alpha(@window_fg_color, 0.06);
+  color: @window_fg_color;
+}
+
+viewswitcher button:active,
+headerbar viewswitcher button:active {
+  background: alpha(@window_fg_color, 0.1);
+}
+
+viewswitcher button:checked,
+viewswitcher button:checked:hover,
+headerbar viewswitcher button:checked,
+headerbar viewswitcher button:checked:hover {
+  background: alpha(@success_color, 0.16);
+  color: @success_color;
+  font-weight: 700;
 }
 
 entry {
@@ -3413,7 +3462,7 @@ fn show_preferences_window(app: &adw::Application, profile: &Profile, state: Rc<
     let window = adw::PreferencesWindow::new();
     window.set_application(Some(app));
     window.set_title(Some("Settings"));
-    window.set_default_size(640, 660);
+    window.set_default_size(SETTINGS_WINDOW_WIDTH, SETTINGS_WINDOW_HEIGHT);
     window.set_search_enabled(false);
     let shared_config = Arc::clone(&state.config);
     let config = shared_config
@@ -3574,7 +3623,17 @@ fn show_preferences_window(app: &adw::Application, profile: &Profile, state: Rc<
             "Linux direct install / AppImage"
         })),
     ));
+    about_group.add(&preference_row(
+        "License",
+        None,
+        &gtk::Label::new(Some("MIT")),
+    ));
+    let links_group = preference_group("Links");
+    links_group.add(&link_row("Website", WEBSITE_URL));
+    links_group.add(&link_row("Source code", SOURCE_URL));
+    links_group.add(&link_row("Report a problem", ISSUES_URL));
     about_page.add(&about_group);
+    about_page.add(&links_group);
 
     window.add(&general_page);
     window.add(&quick_pick_page);
@@ -3632,6 +3691,25 @@ fn preference_row(
     }
     control.set_valign(gtk::Align::Center);
     row.add_suffix(control);
+    row
+}
+
+/// A row that opens `url` in the default browser when activated.
+fn link_row(title: &str, url: &'static str) -> adw::ActionRow {
+    let row = adw::ActionRow::new();
+    row.set_title(title);
+    row.set_subtitle(url);
+    row.set_activatable(true);
+    let icon = gtk::Image::from_icon_name("adw-external-link-symbolic");
+    icon.set_valign(gtk::Align::Center);
+    row.add_suffix(&icon);
+    row.connect_activated(move |_| {
+        if let Err(error) =
+            gtk::gio::AppInfo::launch_default_for_uri(url, None::<&gtk::gio::AppLaunchContext>)
+        {
+            eprintln!("Could not open {url}: {error}");
+        }
+    });
     row
 }
 
