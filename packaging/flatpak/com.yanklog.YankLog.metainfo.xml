@@ -26,8 +26,8 @@
     <binary>yanklog</binary>
   </provides>
   <url type="homepage">https://yanklog.com</url>
-  <url type="bugtracker">https://github.com/thisiseesmaeel/yanklog-linux/issues</url>
-  <url type="vcs-browser">https://github.com/thisiseesmaeel/yanklog-linux</url>
+  <url type="bugtracker">https://github.com/act1labs/yanklog-linux/issues</url>
+  <url type="vcs-browser">https://github.com/act1labs/yanklog-linux</url>
   <developer id="com.yanklog">
     <name>Ismail Safwat</name>
   </developer>
@@ -42,7 +42,7 @@
   </keywords>
   <screenshots>
     <screenshot type="default">
-      <image>https://raw.githubusercontent.com/thisiseesmaeel/yanklog-linux/master/packaging/flatpak/screenshots/main.png</image>
+      <image>https://raw.githubusercontent.com/act1labs/yanklog-linux/master/packaging/flatpak/screenshots/main.png</image>
       <caption>Search and manage encrypted clipboard history</caption>
     </screenshot>
   </screenshots>

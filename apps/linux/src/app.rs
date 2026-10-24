@@ -27,8 +27,8 @@ const FLATPAK_APP_ID: &str = "com.yanklog.YankLog";
 const BUNDLED_LINUX_INSTALL_SCRIPT: &str = include_str!("../../../install.sh");
 const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
 const WEBSITE_URL: &str = "https://yanklog.com";
-const SOURCE_URL: &str = "https://github.com/thisiseesmaeel/yanklog-linux";
-const ISSUES_URL: &str = "https://github.com/thisiseesmaeel/yanklog-linux/issues";
+const SOURCE_URL: &str = "https://github.com/act1labs/yanklog-linux";
+const ISSUES_URL: &str = "https://github.com/act1labs/yanklog-linux/issues";
 // Wide enough for the five tabs to sit in the header bar, tall enough for the
 // longest tab to show without scrolling.
 const SETTINGS_WINDOW_WIDTH: i32 = 780;
