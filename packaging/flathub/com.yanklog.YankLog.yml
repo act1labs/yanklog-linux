@@ -33,8 +33,8 @@ modules:
     sources:
       - type: git
         url: https://github.com/act1labs/yanklog-linux.git
-        tag: v2.5.0
-        commit: 76c1f9f451f1862df0ac825a0eceac13eba86295
+        tag: v2.5.1
+        commit: a2cb9660b6e77915149b1f6acc90879b5e0917ed
         x-checker-data:
           type: git
           tag-pattern: ^v([\d.]+)$
