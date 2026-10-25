@@ -1,0 +1,5 @@
+YankLog 2.5.1 for Linux is a small Settings polish release.
+
+- The selected Settings tab is highlighted, and the window opens wide enough for the tabs to sit in the header bar.
+- The About tab lists the license and links to the website, source code and issue tracker.
+- Update checks and project links now use YankLog's current GitHub home.

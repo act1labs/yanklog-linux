@@ -3478,7 +3478,7 @@ dependencies = [
 
 [[package]]
 name = "yanklog-linux-native"
-version = "2.5.0"
+version = "2.5.1"
 dependencies = [
  "ashpd",
  "async-io",

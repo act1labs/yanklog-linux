@@ -5,7 +5,7 @@ use std::process::{Command, Stdio};
 
 use crate::profile::{Platform, Profile};
 
-const DEFAULT_GITHUB_REPO: &str = "thisiseesmaeel/yanklog-linux";
+const DEFAULT_GITHUB_REPO: &str = "act1labs/yanklog-linux";
 const DEFAULT_MACOS_BASE_URL: &str = "https://downloads.yanklog.com/macos";
 
 pub fn check_for_update(

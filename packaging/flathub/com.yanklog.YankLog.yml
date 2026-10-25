@@ -32,7 +32,7 @@ modules:
       - install -Dm644 LICENSES/MIT.txt /app/share/licenses/com.yanklog.YankLog/MIT.txt
     sources:
       - type: git
-        url: https://github.com/thisiseesmaeel/yanklog-linux.git
+        url: https://github.com/act1labs/yanklog-linux.git
         tag: v2.5.0
         commit: 76c1f9f451f1862df0ac825a0eceac13eba86295
         x-checker-data:

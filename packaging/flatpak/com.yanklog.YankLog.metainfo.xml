@@ -47,6 +47,15 @@
     </screenshot>
   </screenshots>
   <releases>
+    <release version="2.5.1" date="2026-10-25">
+      <description>
+        <p>Settings polish.</p>
+        <ul>
+          <li>The selected Settings tab is highlighted, and the tabs sit in the header bar.</li>
+          <li>The About tab lists the license and links to the website, source code and issue tracker.</li>
+        </ul>
+      </description>
+    </release>
     <release version="2.5.0" date="2026-10-19">
       <description>
         <p>YankLog no longer needs X11 or a tray icon.</p>
