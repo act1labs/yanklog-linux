@@ -167,27 +167,46 @@ Build provenance is published next to each AppImage as `.buildinfo`. See [REPROD
 
 ## Flatpak / Flathub
 
-Production Flatpak packaging lives in `packaging/flatpak/` and uses the app ID
-`com.yanklog.YankLog`. The `Build AppImages` GitHub Actions workflow builds both
-`x86_64` and `aarch64` bundles against the GNOME 50 runtime, alongside the
-AppImage builds.
+YankLog is published on Flathub as
+[`com.yanklog.YankLog`](https://flathub.org/apps/com.yanklog.YankLog). Flathub is the
+recommended Flatpak install. Flathub builds it from the separate repository
+[`flathub/com.yanklog.YankLog`](https://github.com/flathub/com.yanklog.YankLog), which
+holds only the manifest and `generated-sources.json`.
+
+Upstream Flatpak packaging lives in `packaging/flatpak/`. The `Build AppImages`
+GitHub Actions workflow builds both `x86_64` and `aarch64` bundles against the
+GNOME 51 runtime, alongside the AppImage builds.
 
 The app builds without network access, uses generated Cargo source metadata, and
-has no broad host filesystem access. It uses X11 directly and XWayland on Wayland
-desktops because its current clipboard backend is X11-based. Flatpak updates are
-managed by the user's software center or `flatpak update`; the direct-download
-`--update` flow is disabled in the sandbox.
+has no broad host filesystem access. On Wayland it reads the clipboard through GTK
+and needs no X11; `--socket=fallback-x11` grants X11 only in X11 sessions. Flatpak
+updates are managed by the user's software center or `flatpak update`; the
+direct-download `--update` flow is disabled in the sandbox.
 
 The upstream manifest intentionally builds from the current checkout so CI can
-test untagged commits. For a Flathub submission, copy the manifest into the
-Flathub repository and replace its local `dir` source with this public repository
-at a released tag and the tag's exact commit. See
-[`packaging/flatpak/README.md`](packaging/flatpak/README.md) for the commands and
-submission checklist.
+test untagged commits. The Flathub manifest builds from a released tag and that
+tag's exact commit instead. `packaging/flathub/` keeps a reference copy of it.
+
+### Releasing To Flathub
+
+1. In the release prep commit, add a `<release>` entry with the new version and
+   today's date to `packaging/flatpak/com.yanklog.YankLog.metainfo.xml`. Flathub
+   validates it from the tag.
+2. Push the `v*` tag as usual.
+3. Flathub's external data checker runs every few hours. When it finds the tag, it
+   opens a pull request in `flathub/com.yanklog.YankLog` that updates `tag` and
+   `commit`, and a test build runs on it.
+4. If `Cargo.lock` changed since the last release, regenerate
+   `generated-sources.json` (see
+   [`packaging/flatpak/README.md`](packaging/flatpak/README.md#regenerate-cargo-sources)),
+   copy it to `packaging/flathub/`, and push it onto the checker's branch.
+   Otherwise the test build fails on a missing crate.
+5. Merge the pull request once the test build passes. Flathub publishes the update
+   within a few hours.
 
 ### Self-Hosted Repository
 
-When Flathub is not an option, the project can publish a self-hosted Flatpak
+As an alternative to Flathub, the project publishes a self-hosted Flatpak
 repository to Cloudflare R2 alongside the AppImage releases. The repository lives
 at `https://downloads.yanklog.com/linux/flatpak/`.
 

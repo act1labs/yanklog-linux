@@ -1,6 +1,6 @@
-# Copy this file and generated-sources.json into the com.yanklog.YankLog Flathub
-# repository. Update tag and commit together for every release; both must refer to
-# the same public Git tag.
+# Reference copy of the manifest in github.com/flathub/com.yanklog.YankLog, which is
+# the source of truth. Flathub's external data checker updates tag and commit there for
+# each release; both must refer to the same public Git tag.
 app-id: com.yanklog.YankLog
 runtime: org.gnome.Platform
 runtime-version: "51"
