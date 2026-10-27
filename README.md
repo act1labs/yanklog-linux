@@ -2,10 +2,27 @@
 
 Open-source Linux app and shared Rust core for yanklog.
 
-YankLog 2.0 includes complete-history paging, a redesigned keyboard-first Quick Pick,
-password-encrypted backups, Secret Service key protection, sensitive-value filters,
-timed pauses, safer clearing with keep-pinned support, deletion undo, onboarding,
-automatic settings saving, and native tray integration.
+YankLog keeps a searchable history of the text you copy, in an encrypted database on
+your device. Clipboard content is never sent anywhere. As of 2.5:
+
+- **History**: search everything you have copied, grouped into Pinned, Today,
+  Yesterday and Earlier. Pin clips, undo deletions, and clear history while keeping
+  pinned items.
+- **Quick Pick**: a keyboard-first picker you open from a desktop shortcut, with a
+  full-text preview of the highlighted clip.
+- **Privacy**: filters skip secret-like values, one-time codes and words you list, and
+  history can be capped by size and age. Pause capture for 15 minutes, an hour, until
+  tomorrow or indefinitely; a pause survives a restart.
+- **Key storage**: the Flatpak keeps the database key through the Secret portal. The
+  AppImage uses the Secret Service, with a protected local key file as a fallback.
+- **Backups**: password-encrypted backups of the full history or pinned items only,
+  with or without settings.
+- **Desktop**: the Flatpak captures the clipboard on Wayland, GNOME included, without
+  X11. A tray icon is optional; the main window's menu has Quit (Ctrl+Q). Settings
+  save as you change them, with light, dark and system themes and optional start at
+  login.
+- **Updates**: Flathub updates the Flatpak; the AppImage checks for new releases
+  itself.
 
 This repository contains:
 
