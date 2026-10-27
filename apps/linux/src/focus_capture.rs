@@ -2,9 +2,9 @@
 //! clipboard: GNOME on Wayland without X11, as in the Flatpak build.
 //!
 //! Wayland only sends the current selection to the focused client, so a background
-//! app learns of a copy in two ways. If YankLog owns the selection, another app
+//! app learns of a copy in two ways. If yanklog owns the selection, another app
 //! copying cancels it, which is reported even without focus. Otherwise the offer
-//! YankLog last saw stops being readable once its source is replaced. Either way a
+//! yanklog last saw stops being readable once its source is replaced. Either way a
 //! nearly transparent window takes focus for a moment, reads the new text and closes.
 
 use gtk::glib;
@@ -35,7 +35,7 @@ struct Monitor {
     hooks: Hooks,
     sentinel: String,
     last_formats: RefCell<String>,
-    /// YankLog's own content (a copied entry or the sentinel) is on the clipboard.
+    /// yanklog's own content (a copied entry or the sentinel) is on the clipboard.
     owned: Cell<bool>,
     capturing: Cell<bool>,
     probing: Cell<bool>,
@@ -84,7 +84,7 @@ pub fn start(app: &adw::Application, poll_interval: Duration, hooks: Hooks) {
     });
 }
 
-/// Puts text on the clipboard through GTK. The text stays available while YankLog runs.
+/// Puts text on the clipboard through GTK. The text stays available while yanklog runs.
 pub fn set_text(text: &str) -> bool {
     match gtk::gdk::Display::default() {
         Some(display) => {
@@ -107,7 +107,7 @@ impl Monitor {
         if self.clipboard.is_local() {
             self.owned.set(true);
         } else if self.owned.replace(false) {
-            // Another app took the selection from YankLog.
+            // Another app took the selection from yanklog.
             self.capture(true);
         }
     }
@@ -149,7 +149,7 @@ impl Monitor {
         self.probe();
     }
 
-    /// Reads the offer YankLog last saw. A read that keeps failing means it was replaced.
+    /// Reads the offer yanklog last saw. A read that keeps failing means it was replaced.
     fn probe(self: &Rc<Self>) {
         self.probing.set(true);
         let monitor = Rc::clone(self);
@@ -160,7 +160,7 @@ impl Monitor {
                 Some(text) => {
                     monitor.probe_failures.set(0);
                     monitor.captured_offer.set(false);
-                    // Text that was already there when YankLog started, for example.
+                    // Text that was already there when yanklog started, for example.
                     if let Some(text) = text {
                         monitor.accept(text, true);
                     }
@@ -211,7 +211,7 @@ impl Monitor {
             return;
         }
 
-        // A YankLog window that already has focus receives the selection directly.
+        // A yanklog window that already has focus receives the selection directly.
         if self
             .app
             .active_window()
@@ -223,7 +223,7 @@ impl Monitor {
 
         let window = gtk::Window::builder()
             .application(&self.app)
-            .title("YankLog")
+            .title("yanklog")
             .decorated(false)
             .resizable(false)
             .default_width(1)

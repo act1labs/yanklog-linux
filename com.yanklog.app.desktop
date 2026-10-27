@@ -1,6 +1,6 @@
 [Desktop Entry]
 Type=Application
-Name=YankLog
+Name=yanklog
 GenericName=Clipboard Manager
 Comment=Clipboard manager for Linux
 Exec=yanklog

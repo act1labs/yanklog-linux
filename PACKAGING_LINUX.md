@@ -167,7 +167,7 @@ Build provenance is published next to each AppImage as `.buildinfo`. See [REPROD
 
 ## Flatpak / Flathub
 
-YankLog is published on Flathub as
+yanklog is published on Flathub as
 [`com.yanklog.YankLog`](https://flathub.org/apps/com.yanklog.YankLog). Flathub is the
 recommended Flatpak install. Flathub builds it from the separate repository
 [`flathub/com.yanklog.YankLog`](https://github.com/flathub/com.yanklog.YankLog), which
@@ -291,7 +291,7 @@ The installer writes:
 - `~/.local/share/applications/com.yanklog.app.desktop`
 - `~/.local/share/applications/com.yanklog.app.quickpick.desktop`
 
-The main desktop entry appears in app launchers as `YankLog` and includes a `Quick Pick` action. The quick-pick desktop entry launches the picker directly and stays hidden from normal app menus. The command shown after install is the safest command to bind because it uses the absolute installed binary path:
+The main desktop entry appears in app launchers as `yanklog` and includes a `Quick Pick` action. The quick-pick desktop entry launches the picker directly and stays hidden from normal app menus. The command shown after install is the safest command to bind because it uses the absolute installed binary path:
 
 ```sh
 ~/.local/bin/yanklog --pick

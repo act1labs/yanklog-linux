@@ -627,7 +627,7 @@ fn build_main_window(app: &adw::Application, database: Database, present_window:
 
     let header = adw::HeaderBar::new();
     header.set_title_widget(Some(&gtk::Box::new(gtk::Orientation::Horizontal, 0)));
-    // Closing the window keeps YankLog running, so quitting must not depend on a tray.
+    // Closing the window keeps yanklog running, so quitting must not depend on a tray.
     header.pack_end(&main_menu_button(app));
     let settings_button = gtk::Button::with_label("Settings");
     let pause_button = gtk::Button::with_label("Pause");
@@ -924,7 +924,7 @@ fn maybe_show_onboarding(
 
     let welcome = onboarding_page(
         "Private clipboard history",
-        "YankLog keeps your clipboard history encrypted on this computer. Your clipboard content is not transmitted anywhere.",
+        "yanklog keeps your clipboard history encrypted on this computer. Your clipboard content is not transmitted anywhere.",
     );
     let protections = onboarding_page(
         "Choose your protections",
@@ -939,12 +939,12 @@ fn maybe_show_onboarding(
 
     let ready = onboarding_page(
         "Ready for faster copying",
-        "Add the Quick Pick command to your desktop keyboard shortcuts, then copy something to try YankLog.",
+        "Add the Quick Pick command to your desktop keyboard shortcuts, then copy something to try yanklog.",
     );
     ready.append(&info_row("Quick Pick", &quick_picker_command_text()));
     let copy_command = gtk::Button::with_label("Copy Quick Pick Command");
     copy_command.set_halign(gtk::Align::Start);
-    let launch_at_startup = gtk::CheckButton::with_label("Start YankLog when I sign in");
+    let launch_at_startup = gtk::CheckButton::with_label("Start yanklog when I sign in");
     launch_at_startup.set_active(config.launch_at_startup);
     ready.append(&copy_command);
     ready.append(&launch_at_startup);
@@ -1213,7 +1213,7 @@ fn resolve_secure_database_key(profile: &Profile) -> Result<(String, Option<Path
             set_aside_unreadable_history(profile);
         }
         keyring
-            .create_item("YankLog database key", &attributes, key.as_str(), true)
+            .create_item("yanklog database key", &attributes, key.as_str(), true)
             .await
             .map_err(|error| error.to_string())?;
         Ok((key, migrated_path))
@@ -1328,7 +1328,7 @@ fn main_menu_button(app: &adw::Application) -> gtk::MenuButton {
     app.set_accels_for_action("app.quit", &["<Control>q"]);
 
     let menu = gtk::gio::Menu::new();
-    menu.append(Some("Quit YankLog"), Some("app.quit"));
+    menu.append(Some("Quit yanklog"), Some("app.quit"));
     gtk::MenuButton::builder()
         .icon_name("open-menu-symbolic")
         .tooltip_text("Main menu")
@@ -1720,7 +1720,7 @@ fn request_flatpak_launch_at_startup(
     thread::spawn(move || {
         let result = async_io::block_on(async move {
             let request = Background::request()
-                .reason("Start YankLog at login to monitor your clipboard.")
+                .reason("Start yanklog at login to monitor your clipboard.")
                 .auto_start(enabled)
                 .command(["yanklog", "--background"])
                 .send()
@@ -3607,7 +3607,7 @@ fn show_preferences_window(app: &adw::Application, profile: &Profile, state: Rc<
     let about_page = preference_page("About", "help-about-symbolic");
     let about_group = preference_group("About");
     about_group.set_description(Some(
-        "YankLog keeps clipboard content on this device and does not transmit your history.",
+        "yanklog keeps clipboard content on this device and does not transmit your history.",
     ));
     about_group.add(&preference_row(
         "Version",
@@ -3937,7 +3937,7 @@ fn storage_page(
         let status_label = status_label.clone();
         export_button.connect_clicked(move |_| {
             let chooser = gtk::FileChooserNative::new(
-                Some("Export encrypted YankLog backup"),
+                Some("Export encrypted yanklog backup"),
                 Some(&parent),
                 gtk::FileChooserAction::Save,
                 Some("Export"),
@@ -3972,14 +3972,14 @@ fn storage_page(
         let status_label = status_label.clone();
         import_button.connect_clicked(move |_| {
             let chooser = gtk::FileChooserNative::new(
-                Some("Restore encrypted YankLog backup"),
+                Some("Restore encrypted yanklog backup"),
                 Some(&parent),
                 gtk::FileChooserAction::Open,
                 Some("Restore"),
                 Some("Cancel"),
             );
             let filter = gtk::FileFilter::new();
-            filter.set_name(Some("YankLog backups"));
+            filter.set_name(Some("yanklog backups"));
             filter.add_pattern("*.yanklog");
             chooser.set_filter(&filter);
             let parent = parent.clone();
@@ -4335,7 +4335,7 @@ fn show_quick_picker_shortcut_help(app: &adw::Application) {
 
     let shortcut_command = quick_picker_command_text();
     let intro = settings_note(
-        "YankLog exposes the quick picker as a command. Bind this exact command in your Linux desktop keyboard settings:",
+        "yanklog exposes the quick picker as a command. Bind this exact command in your Linux desktop keyboard settings:",
     );
     let command = info_row("Command", &shortcut_command);
     let path_note = settings_note(

@@ -98,7 +98,7 @@ pub fn read_encrypted(path: &Path, password: &str) -> Result<BackupContents, Str
     let encoded = fs::read(path).map_err(|error| error.to_string())?;
     let header_length = MAGIC.len() + SALT_LENGTH + NONCE_LENGTH;
     if encoded.len() <= header_length || &encoded[..MAGIC.len()] != MAGIC {
-        return Err("This is not a supported YankLog backup.".to_string());
+        return Err("This is not a supported yanklog backup.".to_string());
     }
 
     let salt_start = MAGIC.len();
@@ -115,7 +115,7 @@ pub fn read_encrypted(path: &Path, password: &str) -> Result<BackupContents, Str
     let document: BackupDocument = serde_json::from_slice(&plaintext)
         .map_err(|_| "The backup data is invalid.".to_string())?;
     if document.format_version != 1 {
-        return Err("This backup was created by an unsupported YankLog version.".to_string());
+        return Err("This backup was created by an unsupported yanklog version.".to_string());
     }
     Ok(BackupContents {
         entries: document

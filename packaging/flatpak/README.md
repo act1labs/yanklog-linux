@@ -1,6 +1,6 @@
 # Flatpak Packaging
 
-This directory contains the upstream Flatpak packaging for YankLog. The Flatpak ID is
+This directory contains the upstream Flatpak packaging for yanklog. The Flatpak ID is
 `com.yanklog.YankLog`; the older starter ID `com.yanklog.app` must not be submitted.
 
 ## Build
@@ -58,7 +58,7 @@ rm flatpak-cargo-generator.py
 
 ## Flathub
 
-YankLog is published on Flathub. Releases reach it through pull requests in
+yanklog is published on Flathub. Releases reach it through pull requests in
 [`flathub/com.yanklog.YankLog`](https://github.com/flathub/com.yanklog.YankLog), which
 Flathub's external data checker opens when it finds a new `v*` tag. See
 [Releasing To Flathub](../../PACKAGING_LINUX.md#releasing-to-flathub) for the steps,

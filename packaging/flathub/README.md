@@ -1,6 +1,6 @@
 # Flathub Manifest Reference
 
-YankLog is published on Flathub from
+yanklog is published on Flathub from
 [`flathub/com.yanklog.YankLog`](https://github.com/flathub/com.yanklog.YankLog). That
 repository is the source of truth. The two files here are reference copies of it:
 

@@ -307,7 +307,7 @@ TARGET_BIN="${INSTALL_DIR}/${APP_NAME}"
 PREVIOUS_BIN="${TMP_DIR}/${APP_NAME}.previous"
 
 if [ -f "$TARGET_BIN" ]; then
-    cp -p "$TARGET_BIN" "$PREVIOUS_BIN" || die "Could not preserve the previous YankLog installation"
+    cp -p "$TARGET_BIN" "$PREVIOUS_BIN" || die "Could not preserve the previous yanklog installation"
 fi
 
 log "Installing AppImage..."
@@ -344,7 +344,7 @@ if [ "$SKIP_DESKTOP" -eq 0 ]; then
     cat > "$DESKTOP_FILE" <<EOF
 [Desktop Entry]
 Type=Application
-Name=YankLog
+Name=yanklog
 GenericName=Clipboard Manager
 Comment=Clipboard manager for Linux
 Exec=${DESKTOP_EXEC}

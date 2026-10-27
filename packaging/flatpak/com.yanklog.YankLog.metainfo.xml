@@ -3,11 +3,11 @@
   <id>com.yanklog.YankLog</id>
   <metadata_license>MIT</metadata_license>
   <project_license>MIT</project_license>
-  <name>YankLog</name>
-  <summary>Private, searchable clipboard history</summary>
+  <name>yanklog</name>
+  <summary>Searchable clipboard history</summary>
   <description>
     <p>
-      YankLog keeps copied text searchable without sending clipboard content off your
+      yanklog keeps copied text searchable without sending clipboard content off your
       device. Clipboard history is stored in a local encrypted database and can be
       paused or filtered whenever needed.
     </p>
@@ -18,7 +18,7 @@
     </p>
     <p>
       Password-encrypted backups can move selected items or the complete history
-      between YankLog installations.
+      between yanklog installations.
     </p>
   </description>
   <launchable type="desktop-id">com.yanklog.YankLog.desktop</launchable>
@@ -40,6 +40,10 @@
     <keyword>copy</keyword>
     <keyword>paste</keyword>
   </keywords>
+  <branding>
+    <color type="primary" scheme_preference="light">#e0e7ff</color>
+    <color type="primary" scheme_preference="dark">#312e81</color>
+  </branding>
   <screenshots>
     <screenshot type="default">
       <image>https://raw.githubusercontent.com/act1labs/yanklog-linux/master/packaging/flatpak/screenshots/main.png</image>
@@ -47,6 +51,11 @@
     </screenshot>
   </screenshots>
   <releases>
+    <release version="2.5.2" date="2026-10-27">
+      <description>
+        <p>The app is called yanklog everywhere: in the app launcher, windows, menus and dialogs.</p>
+      </description>
+    </release>
     <release version="2.5.1" date="2026-10-25">
       <description>
         <p>Settings polish.</p>
@@ -58,11 +67,11 @@
     </release>
     <release version="2.5.0" date="2026-10-19">
       <description>
-        <p>YankLog no longer needs X11 or a tray icon.</p>
+        <p>yanklog no longer needs X11 or a tray icon.</p>
         <ul>
           <li>Clipboard history works on GNOME Wayland without X11.</li>
           <li>The database key is kept through the Secret portal, whatever password manager you use.</li>
-          <li>The main window has a menu with Quit (Ctrl+Q), so YankLog can be closed without a tray icon.</li>
+          <li>The main window has a menu with Quit (Ctrl+Q), so yanklog can be closed without a tray icon.</li>
         </ul>
         <p>History saved by earlier Flatpak builds cannot be opened by this version and is moved aside.</p>
       </description>

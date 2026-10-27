@@ -2,7 +2,7 @@
 
 Open-source Linux app and shared Rust core for yanklog.
 
-YankLog keeps a searchable history of the text you copy, in an encrypted database on
+yanklog keeps a searchable history of the text you copy, in an encrypted database on
 your device. Clipboard content is never sent anywhere. As of 2.5:
 
 - **History**: search everything you have copied, grouped into Pinned, Today,
@@ -36,7 +36,7 @@ The Linux app and shared Rust core are licensed under the MIT License. See `LICE
 
 ## Install
 
-YankLog is on [Flathub](https://flathub.org/apps/com.yanklog.YankLog) for x86_64 and
+yanklog is on [Flathub](https://flathub.org/apps/com.yanklog.YankLog) for x86_64 and
 aarch64. This is the recommended install, and Flathub delivers updates. Install it from
 your software center, or run:
 
