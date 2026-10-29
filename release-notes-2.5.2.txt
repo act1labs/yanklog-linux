@@ -1,4 +1,5 @@
-yanklog 2.5.2 for Linux is a small consistency release.
+yanklog 2.5.2 for Linux fixes starting at login.
 
+- "Start yanklog at login" now works. Before, yanklog quit as soon as it was started at login, so it did not run in the background until you opened it yourself.
 - The app is called yanklog everywhere: in the app launcher, window titles, menus and dialogs.
 - The software center listing has a shorter summary, brand colors and new screenshots.

@@ -61,7 +61,7 @@
   <releases>
     <release version="2.5.2" date="2026-10-29">
       <description>
-        <p>The app is called yanklog everywhere: in the app launcher, windows, menus and dialogs.</p>
+        <p>Starting at login now works, and the app is called yanklog everywhere.</p>
       </description>
     </release>
     <release version="2.5.1" date="2026-10-25">

@@ -433,6 +433,24 @@ pub fn run() {
     }
 
     let application = adw::Application::builder().application_id(app_id()).build();
+    // GApplication rejects options it does not know and exits, so register the flags
+    // read above. Start at login passes --background.
+    for (name, description) in [
+        (
+            "background",
+            "Start hidden and wait for the keyring, as at login",
+        ),
+        ("hidden", "Start without showing the main window"),
+    ] {
+        application.add_main_option(
+            name,
+            glib::Char::from(0u8),
+            glib::OptionFlags::NONE,
+            glib::OptionArg::None,
+            description,
+            None,
+        );
+    }
     let starting = Rc::new(Cell::new(false));
     let show_requested = Rc::new(Cell::new(!start_hidden));
     application.connect_activate(move |app| {
