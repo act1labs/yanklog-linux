@@ -49,9 +49,17 @@
       <image>https://raw.githubusercontent.com/act1labs/yanklog-linux/master/packaging/flatpak/screenshots/main.png</image>
       <caption>Search and manage encrypted clipboard history</caption>
     </screenshot>
+    <screenshot>
+      <image>https://raw.githubusercontent.com/act1labs/yanklog-linux/master/packaging/flatpak/screenshots/quick-pick.png</image>
+      <caption>Pick a recent clip from the keyboard with Quick Pick</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://raw.githubusercontent.com/act1labs/yanklog-linux/master/packaging/flatpak/screenshots/settings.png</image>
+      <caption>Choose what is recorded and how long it is kept</caption>
+    </screenshot>
   </screenshots>
   <releases>
-    <release version="2.5.2" date="2026-10-27">
+    <release version="2.5.2" date="2026-10-29">
       <description>
         <p>The app is called yanklog everywhere: in the app launcher, windows, menus and dialogs.</p>
       </description>

@@ -1,4 +1,4 @@
 yanklog 2.5.2 for Linux is a small consistency release.
 
 - The app is called yanklog everywhere: in the app launcher, window titles, menus and dialogs.
-- The software center listing has a shorter summary and brand colors.
+- The software center listing has a shorter summary, brand colors and new screenshots.
